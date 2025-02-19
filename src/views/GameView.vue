@@ -1,8 +1,16 @@
 <script setup>
-    import { ref } from 'vue';
-    import TimerContainer from './TimerContainer.vue';
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import TimerContainer from '../components/TimerContainer.vue'
+
+const route = useRoute()
+const gameData = computed(() => JSON.parse(route.params.data))
 </script>
 
 <template>
-    <TimerContainer />
+  <main>
+    <h1>Game View</h1>
+    <p>Player Name: {{ gameData.playerName }}</p>
+    <p>Time: {{ gameData.time }}</p>
+  </main>
 </template>

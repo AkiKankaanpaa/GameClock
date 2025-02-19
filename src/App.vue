@@ -1,14 +1,11 @@
 <script setup>
   import { RouterLink, RouterView } from 'vue-router'
   import TimerContainer from './components/PlayerTimer.vue'
-  import GameView from './components/GameView.vue';
+  import GameView from './views/GameView.vue';
 </script>
 
 <template>
   <header>
-    <div class="wrapper">
-    <TimerContainer />
-    </div>
   </header>
 
   <RouterView />
