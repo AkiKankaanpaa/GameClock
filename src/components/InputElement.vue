@@ -16,10 +16,17 @@ defineProps({
 <template>
   <div class="form-group">
     <label>{{ label }}</label>
-    <input 
+    <input
       type="text"
       :value="modelValue"
       @input="$emit('update:modelValue', $event.target.value)"
+      class="form-control"
     />
   </div>
 </template>
+
+<style scoped>
+.form-group {
+  margin-bottom: 5px;
+}
+</style>
