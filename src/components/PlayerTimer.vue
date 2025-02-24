@@ -1,6 +1,5 @@
 <template>
     <div class="playertimer">
-      <h1>Timer</h1>
       <button type="button" class="btn btn-primary" @click="toggleTimer">{{ playerName + " - " + formattedTime }}</button>
       <button @click="resetTimer">Reset</button>
     </div>

@@ -12,17 +12,9 @@
 
 <template>
   <div class="timer-container">
-    <h1>Player Timers</h1>
-    <div class="row">
-      <div class="form-group">
-        <label for="numTimers">Number of Timers:</label>
-        <input type="number" id="numTimers" v-model.number="numTimersInput" class="form-control" min="1" />
-        <button type="button" class="btn btn-primary mt-2" @click="updateNumTimers">Update Timers</button>
-      </div>
-    </div>
-
+    <button @click="resetTimer">Reset</button>
     <div class="timers">
-        <PlayerTimer v-for="n in numTimers" :key="n" :playerName="'Player ' + n" />
+      <PlayerTimer v-for="n in numTimers" :key="n" :playerName="'Player ' + n" />
     </div>
   </div>
 </template>
