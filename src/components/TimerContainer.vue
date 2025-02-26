@@ -1,13 +1,13 @@
 <script setup>
-    import { ref } from 'vue';
-    import PlayerTimer from './PlayerTimer.vue';
+  import { ref } from 'vue';
+  import PlayerTimer from './PlayerTimer.vue';
 
-    const numTimersInput = ref(1);
-    const numTimers = ref(1);
+  const numTimersInput = ref(1);
+  const numTimers = ref(1);
 
-    const updateNumTimers = () => {
-        numTimers.value = numTimersInput.value;
-    };
+  const updateNumTimers = () => {
+      numTimers.value = numTimersInput.value;
+  };
 </script>
 
 <template>
@@ -33,3 +33,13 @@
     justify-content: center;
   }
   </style>
+
+  
+export default{
+  props:{
+    p:{
+      type:String, 
+        default:
+    }
+  }
+}
