@@ -17,23 +17,34 @@
   wss.connection.value.onmessage = (event) => {
     const data = JSON.parse(event.data);
 
-    if (data.type === 'sentUpdateData') {
-      gameStore.setGameData(data.data);
-    }
-
-    if (data.type === 'sentInitialData') {
+    if (data.type === 'serverData') {
       gameStore.setGameData(data.data);
     }
   };
 
   setTimeout(() => {
-    wss.sendMessage(JSON.stringify({ type: 'requestInitialData' }));
+    wss.sendMessage(JSON.stringify({ type: 'requestData' }));
   }, 1000);
 
   const togglePause = () => {
     gameStore.paused = !gameStore.paused;
-    wss.sendMessage(JSON.stringify({ type: 'pause'}));
+    const data = gameStore.returnUpdateData()
+
+    console.log('Sending initial data: \n', data)
+    wss.sendMessage(JSON.stringify({
+      type: 'initialData',
+      data: data.players
+    }))
+  }
+
+  wss.connection.value.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Received data:\n', data)
+    if (data.type === 'serverData') {
+      gameStore.updateGameData(data.data);
+    }
   };
+
 </script>
 
 <template>

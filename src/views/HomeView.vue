@@ -17,22 +17,26 @@ const clockIncrement = ref("60")
 
 const goToGame = () => {
   updatePlayerNames()
-  const players = {}
-  playerNames.value.forEach((name, index) => {
-    players[index] = name
+
+  const playerData = Array.from({ length: playerCount.value }, (_, i) => ({
+    name: playerNames.value[i],
+    time: clockBase.value * 60
+  }))
+
+  console.log('Setting players: \n', playerData)
+
+  gameStore.setInitialGameData({
+    players: playerData,
+    initialTime: Number(clockBase.value) * 60,
+    increment: Number(clockIncrement.value)
   })
 
-  console.log(players)
-  const data = {
-    players: players,
-    time: 60 * clockBase.value,
-    increment: Number(clockIncrement.value)
-  }
+  const data = gameStore.returnUpdateData()
 
-  gameStore.setInitialGameData(data)
+  console.log('Sending initial data: \n', data)
   wss.sendMessage(JSON.stringify({
     type: 'initialData',
-    data: data
+    data: data.players
   }))
 
   router.push({ name: 'game' })

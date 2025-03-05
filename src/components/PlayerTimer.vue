@@ -1,10 +1,10 @@
 <script setup>
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
-import wss from '../services/socketservice';
 import { useGameStore } from '../stores/gamestore'
 
 const gameStore = useGameStore()
 
+const emits = defineEmits(['nextPlayer'])
 const props = defineProps({
   playerName: {
     type: String,
@@ -18,21 +18,6 @@ const props = defineProps({
 
 const isRunning = ref(false);
 let timerInterval = null;
-
-wss.connection.value.onmessage = (event) => {
-  const timers = JSON.parse(event.data);
-  if (timers[props.timerId]) {
-    time.value = timers[props.timerId].time;
-  }
-};
-
-const sendTimerState = () => {
-  const data = {
-    timerId: props.timerId,
-    time: time.value,
-  }
-  wss.send(JSON.stringify(data))
-}
 
 const formattedTime = computed(() => {
   const minutes = String(Math.floor(gameStore
@@ -67,7 +52,7 @@ const toggleNext = () => {
 watch(() => gameStore.activePlayer, (newVal) => {
   console.log("Switching player",
               "\nActive - ", gameStore.activePlayer,
-              "\nTimer - ", Number(props.timerId))
+              "\nTimerId - ", Number(props.timerId))
   if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
     startTimer();
   } else {

@@ -12,19 +12,27 @@ export const useGameStore = defineStore('game', {
     setInitialGameData(gameData) {
       console.log('Setting initial game data:', gameData);
       Object.entries(gameData.players).forEach(([key, value]) => {
+        console.log('Setting player:', key, value);
         this.players[key] = {
-          name: value,
-          time: gameData.time,
+          name: value.name,
+          time: value.time,
       }});
-      this.initialTime = gameData.time;
+      this.initialTime = gameData.initialTime;
       this.increment = gameData.increment;
-      this.activePlayer = 0;
-      console.log(this.players)
     },
 
     updateGameData(updateData) {
       this.players = updateData.players;
-      this.time = updateData.time;
+      this.activePlayer = updateData.activePlayer;
+      this.paused = updateData.paused;
+    },
+
+    returnUpdateData() {
+      return {
+        players: this.players,
+        activePlayer: this.activePlayer,
+        paused: this.paused,
+      }
     }
   },
 });
