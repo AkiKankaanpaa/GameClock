@@ -1,80 +1,86 @@
 <script setup>
-import { ref, computed, onBeforeUnmount, watch } from 'vue';
-import { useGameStore } from '../stores/gamestore'
+  import { ref, computed, onBeforeUnmount, watch } from 'vue';
+  import { useGameStore } from '../stores/gamestore'
+  import wss from '../services/socketservice'
 
-const gameStore = useGameStore()
+  const gameStore = useGameStore()
+  const props = defineProps({
+    playerName: {
+      type: String,
+      required: true,
+    },
+    timerId: {
+      type: String,
+      required: true,
+    },
+  })
 
-const emits = defineEmits(['nextPlayer'])
-const props = defineProps({
-  playerName: {
-    type: String,
-    required: true,
-  },
-  timerId: {
-    type: String,
-    required: true,
-  },
-})
+  const isRunning = ref(false);
+  let timerInterval = null;
 
-const isRunning = ref(false);
-let timerInterval = null;
+  const formattedTime = computed(() => {
+    const minutes = String(Math.floor(gameStore
+      .players[Number(props.timerId)]["time"] / 60)).padStart(2, '30');
+    const seconds = String(gameStore
+      .players[Number(props.timerId)]["time"] % 60).padStart(2, '0');
+    return `${minutes}:${seconds}`;
+  });
 
-const formattedTime = computed(() => {
-  const minutes = String(Math.floor(gameStore
-    .players[Number(props.timerId)]["time"] / 60)).padStart(2, '30');
-  const seconds = String(gameStore
-    .players[Number(props.timerId)]["time"] % 60).padStart(2, '0');
-  return `${minutes}:${seconds}`;
-});
+  const startTimer = () => {
+    timerInterval = setInterval(() => {
+      gameStore.players[Number(props.timerId)]["time"]
+        = gameStore.players[Number(props.timerId)]["time"] - 1;
+    }, 1000);
+  };
 
-const startTimer = () => {
-  timerInterval = setInterval(() => {
-    gameStore.players[Number(props.timerId)]["time"]
-      = gameStore.players[Number(props.timerId)]["time"] - 1;
-  }, 1000);
-};
+  const stopTimer = () => {
+    clearInterval(timerInterval);
+  };
 
-const stopTimer = () => {
-  clearInterval(timerInterval);
-};
+  const toggleNext = () => {
+    const playerCount = Object.keys(gameStore.players).length;
+    if (gameStore.activePlayer === playerCount - 1) {
+      gameStore.activePlayer = 0;
+    } else {
+      gameStore.activePlayer = gameStore.activePlayer + 1;
+    }
+    console.log("Currently active player: ", gameStore.activePlayer)
 
-const toggleNext = () => {
-  const playerCount = Object.keys(gameStore.players).length;
-  if (gameStore.activePlayer === playerCount - 1) {
-    console.log(gameStore.activePlayer, playerCount)
-    gameStore.activePlayer = 0;
-  } else {
-    gameStore.activePlayer = gameStore.activePlayer + 1;
-  }
-  console.log("Switched player to ", gameStore.activePlayer)
-};
+    const gameData = gameStore.returnUpdateData()
 
-watch(() => gameStore.activePlayer, (newVal) => {
-  console.log("Switching player",
-              "\nActive - ", gameStore.activePlayer,
-              "\nTimerId - ", Number(props.timerId))
-  if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
-    startTimer();
-  } else {
-    stopTimer();
-  }
-});
+    console.log('Sending toggle data: \n', gameData)
+    wss.sendMessage(JSON.stringify({
+      type: 'updateData',
+      players: gameData.players,
+      activePlayer: gameData.activePlayer,
+      paused: gameData.paused
+    }))
+  };
 
-watch(() => gameStore.paused, () => {
-  console.log("Pause - ", gameStore.paused,
-              "\nActive - ", gameStore.activePlayer,
-              "\nTimer - ", Number(props.timerId))
-  if (gameStore.paused === true) {
-    stopTimer();
-  } else if (gameStore.activePlayer === Number(props.timerId)) {
-    console.log("Starting timer")
-    startTimer();
-  }
-});
+  watch(() => gameStore.activePlayer, (newVal) => {
+    console.log("Active player changed to: ",
+                "\nActive player - ", gameStore.activePlayer,
+                "\nTimerId - ", Number(props.timerId))
+    if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+  });
 
-onBeforeUnmount(() => {
-  clearInterval(timerInterval);
-});
+  watch(() => gameStore.paused, () => {
+    console.log("Pause changed to: ", gameStore.paused,
+                "\nActive player - ", gameStore.activePlayer)
+    if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
+      startTimer();
+    } else {
+      stopTimer();
+    }
+  });
+
+  onBeforeUnmount(() => {
+    clearInterval(timerInterval);
+  });
 </script>
 
 <template>

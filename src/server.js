@@ -47,17 +47,22 @@ wss.on('connection', (ws) => {
         }}));
 
       } else if (data.type === 'updateData') {
+        console.log(data)
         sPlayers = data.players;
         sActivePlayer = data.activePlayer;
         sPaused = data.paused;
-
+        console.log("Current server status:\n",
+          'Players - ', sPlayers,
+          '\nActive player - ', sActivePlayer,
+          '\nPaused - ', sPaused);
         wss.clients.forEach((client) => {
+          console.log("here2")
           if (client.readyState === WebSocket.OPEN) {
             client.send(JSON.stringify({ type: 'serverData', data: {
               players: sPlayers,
               activePlayer: sActivePlayer,
               paused: sPaused,
-            } }));
+            }}));
             console.log('Sent update to all clients, package:\nPlayers - ',
               sPlayers, '\nActive player - ', sActivePlayer, '\nPaused - ', sPaused);
           }

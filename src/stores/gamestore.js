@@ -19,6 +19,8 @@ export const useGameStore = defineStore('game', {
       }});
       this.initialTime = gameData.initialTime;
       this.increment = gameData.increment;
+      this.activePlayer = gameData.activePlayer || 0;
+      this.paused = gameData.paused || true;
     },
 
     updateGameData(updateData) {

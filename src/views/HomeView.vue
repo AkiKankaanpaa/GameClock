@@ -28,7 +28,9 @@ const goToGame = () => {
   gameStore.setInitialGameData({
     players: playerData,
     initialTime: Number(clockBase.value) * 60,
-    increment: Number(clockIncrement.value)
+    increment: Number(clockIncrement.value),
+    activePlayer: 0,
+    paused: true
   })
 
   const data = gameStore.returnUpdateData()

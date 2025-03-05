@@ -22,18 +22,29 @@
     }
   };
 
-  setTimeout(() => {
-    wss.sendMessage(JSON.stringify({ type: 'requestData' }));
-  }, 1000);
-
   const togglePause = () => {
     gameStore.paused = !gameStore.paused;
-    const data = gameStore.returnUpdateData()
+    const gameData = gameStore.returnUpdateData()
 
-    console.log('Sending initial data: \n', data)
+    console.log('Sending pause data: \n', gameData.players)
     wss.sendMessage(JSON.stringify({
-      type: 'initialData',
-      data: data.players
+      type: 'updateData',
+      players: gameData.players,
+      activePlayer: gameData.activePlayer,
+      paused: gameData.paused
+    }))
+  }
+
+  const handleNextPlayer = () => {
+    gameStore.paused = !gameStore.paused;
+    const gameData = gameStore.returnUpdateData()
+
+    console.log('Sending pause data: \n', gameData)
+    wss.sendMessage(JSON.stringify({
+      type: 'updateData',
+      players: gameData.players,
+      activePlayer: gameData.activePlayer,
+      paused: gameData.paused
     }))
   }
 
@@ -45,6 +56,9 @@
     }
   };
 
+  setTimeout(() => {
+    wss.sendMessage(JSON.stringify({ type: 'requestData' }));
+  }, 1000);
 </script>
 
 <template>
