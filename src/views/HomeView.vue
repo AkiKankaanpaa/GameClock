@@ -2,6 +2,7 @@
 import InputElement from '../components/InputElement.vue'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+
 import { useGameStore } from '../stores/gamestore'
 import wss from '../services/socketservice'
 
@@ -12,18 +13,23 @@ const playerCount = ref(1)
 const playerNames = ref([])
 
 const clockBase = ref("20")
-const clockIncrement = ref("1")
+const clockIncrement = ref("60")
 
 const goToGame = () => {
   updatePlayerNames()
+  const players = {}
+  playerNames.value.forEach((name, index) => {
+    players[index] = name
+  })
+
+  console.log(players)
   const data = {
-    players: playerNames.value.map((name, index) => ({
-      playerName: name || `Player ${index + 1}`
-    })),
-    time: [60 * Number(clockBase.value), 60 * Number(clockIncrement.value)]
+    players: players,
+    time: 60 * clockBase.value,
+    increment: Number(clockIncrement.value)
   }
 
-  gameStore.setGameData(data)
+  gameStore.setInitialGameData(data)
   wss.sendMessage(JSON.stringify({
     type: 'initialData',
     data: data
@@ -44,8 +50,8 @@ watch(playerCount, updatePlayerNames)
     <main>
       <p class="h1">Home View</p>
         <div class="form-group">
-          <InputElement :label="'Base Time'" v-model="clockBase" />
-          <InputElement :label="'Clock Increment'" v-model="clockIncrement" />
+          <InputElement :label="'Base Time (minutes)'" v-model="clockBase" />
+          <InputElement :label="'Clock Increment (seconds)'" v-model="clockIncrement" />
           
           <label for="playercount">Player Count</label>
           <input type="number" id="playercount" v-model.number="playerCount" class="form-control" min="1" max="6" />

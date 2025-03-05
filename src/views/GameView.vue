@@ -4,45 +4,64 @@
   import PlayerTimer from '../components/PlayerTimer.vue'
   import { useGameStore } from '../stores/gamestore'
 
-  import { onMounted } from 'vue'
+  import { onBeforeMount } from 'vue'
   import wss from '../services/socketservice'
 
   const gameStore = useGameStore()
-
   const players = computed(() => gameStore.players)
-  const time = computed(() => gameStore.time)
 
-  const currentTimerIndex = ref(0)
-
-  const handleTimerPaused = (index) => {
-    if (index < players.length - 1) {
-      currentTimerIndex.value = index + 1
-    } else {
-      currentTimerIndex.value = 0
-    }
-  }
+  const pauseButtonText = computed(() => {
+    return gameStore.paused ? 'Unpause' : 'Pause';
+  });
 
   wss.connection.value.onmessage = (event) => {
-    const timers = JSON.parse(event.data);
-    players.value.forEach((player, index) => {
-      if (timers[`timer-${index}`]) {
-        player.time = timers[`timer-${index}`].time;
-        player.isRunning = timers[`timer-${index}`].isRunning;
-      }
-    });
+    const data = JSON.parse(event.data);
+
+    if (data.type === 'sentUpdateData') {
+      gameStore.setGameData(data.data);
+    }
+
+    if (data.type === 'sentInitialData') {
+      gameStore.setGameData(data.data);
+    }
   };
 
-  wss.sendMessage(JSON.stringify({ type: 'requestInitialData' }));
+  setTimeout(() => {
+    wss.sendMessage(JSON.stringify({ type: 'requestInitialData' }));
+  }, 1000);
+
+  const togglePause = () => {
+    gameStore.paused = !gameStore.paused;
+    wss.sendMessage(JSON.stringify({ type: 'pause'}));
+  };
 </script>
 
 <template>
   <main>
     <PlayerTimer v-for="(player, index) in gameStore.players"
       :key="index"
-      :playerName="player.playerName"
-      :initialTime="time[0]" 
-      :timerId="'timer-' + index"
-      :isActive="index === currentTimerIndex"
+      :playerName="players[index].name"
+      :initialTime="players[index].time" 
+      :timerId="index"
+      :isActive="index === gameStore.activePlayer"
       @timerPaused="handleTimerPaused(index)"/>
+    <button type="button" class="btn btn-primary mt-2"
+      @click="togglePause">{{ pauseButtonText }}</button>
   </main>
 </template>
+  
+<style scoped>
+.timer {
+  text-align: center;
+}
+.btn-primary {
+  font-size: 3em;
+  margin: 20px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
+}
+button {
+  margin: 5px;
+}
+</style>
