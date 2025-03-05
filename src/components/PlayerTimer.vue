@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onBeforeUnmount, watch } from 'vue';
+import wss from '../services/socketservice';
 
 const props = defineProps({
   playerName: {
@@ -8,6 +9,10 @@ const props = defineProps({
   },
   initialTime: {
     type: Number,
+    required: true,
+  },
+  timerId: {
+    type: String,
     required: true,
   },
   isActive: {
@@ -21,6 +26,23 @@ const emit = defineEmits(['timerPaused'])
 const time = ref(props.initialTime)
 const isRunning = ref(false);
 let timerInterval = null;
+
+wss.connection.value.onmessage = (event) => {
+  const timers = JSON.parse(event.data);
+  if (timers[props.timerId]) {
+    time.value = timers[props.timerId].time;
+    isRunning.value = timers[props.timerId].isRunning;
+  }
+};
+
+const sendTimerState = () => {
+  const data = {
+    timerId: props.timerId,
+    time: time.value,
+    isRunning: isRunning.value,
+  }
+  wss.send(JSON.stringify(data))
+}
 
 const formattedTime = computed(() => {
   const minutes = String(Math.floor(time.value / 60)).padStart(2, '30');

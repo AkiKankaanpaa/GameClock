@@ -2,8 +2,12 @@
 import InputElement from '../components/InputElement.vue'
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useGameStore } from '../stores/gamestore'
+import wss from '../services/socketservice'
 
 const router = useRouter()
+const gameStore = useGameStore()
+
 const playerCount = ref(1)
 const playerNames = ref([])
 
@@ -18,12 +22,17 @@ const goToGame = () => {
     })),
     time: [60 * Number(clockBase.value), 60 * Number(clockIncrement.value)]
   }
-  console.log(data)
-  router.push({ name: 'game', params: { data: JSON.stringify(data) } })
+
+  gameStore.setGameData(data)
+  wss.sendMessage(JSON.stringify({
+    type: 'initialData',
+    data: data
+  }))
+
+  router.push({ name: 'game' })
 }
 
 const updatePlayerNames = () => {
-  console.log(document.getElementById.playerNames)
   playerNames.value = Array.from({ length: playerCount.value }, (_, i) => playerNames.value[i] || '')
 }
 
