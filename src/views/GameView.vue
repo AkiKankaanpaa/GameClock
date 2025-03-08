@@ -35,19 +35,6 @@
     }))
   }
 
-  const handleNextPlayer = () => {
-    gameStore.paused = !gameStore.paused;
-    const gameData = gameStore.returnUpdateData()
-
-    console.log('Sending pause data: \n', gameData)
-    wss.sendMessage(JSON.stringify({
-      type: 'updateData',
-      players: gameData.players,
-      activePlayer: gameData.activePlayer,
-      paused: gameData.paused
-    }))
-  }
-
   wss.connection.value.onmessage = (event) => {
     const data = JSON.parse(event.data);
     console.log('Received data:\n', data)
@@ -63,6 +50,7 @@
 
 <template>
   <main>
+  <div class="playertimer-container">
     <PlayerTimer v-for="(player, index) in gameStore.players"
       :key="index"
       :playerName="players[index].name"
@@ -70,23 +58,42 @@
       :timerId="index"
       :isActive="index === gameStore.activePlayer"
       @timerPaused="handleTimerPaused(index)"/>
+  </div>
     <button type="button" class="btn btn-primary mt-2"
       @click="togglePause">{{ pauseButtonText }}</button>
   </main>
 </template>
   
 <style scoped>
-.timer {
-  text-align: center;
+.playertimer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
+
+.playertimer {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 600px;
+  margin: 10px 0;
+}
+
+button {
+  margin: 5px;
+  width: 100%;
+}
+
+.timer {
+  text-align: left;
+}
+
 .btn-primary {
   font-size: 3em;
   margin: 20px 0;
   cursor: pointer;
   white-space: nowrap;
   text-align: center;
-}
-button {
-  margin: 5px;
 }
 </style>

@@ -84,32 +84,68 @@
 </script>
 
 <template>
-  <div class="playertimer">
-    <button type="button" class="btn btn-primary"
-      :class="{ active: gameStore.activePlayer === Number(props.timerId) }"
-      @click="toggleNext">{{ playerName + ' - ' + formattedTime }}</button>
+  <div class="playertimer-container">
+    <div class="playertimer">
+      <button type="button" class="btn btn-primary"
+        :class="{ active: gameStore.activePlayer === Number(props.timerId) }"
+        @click="toggleNext">
+        <span class="player-name">{{ playerName }}</span>
+      </button>
+      <h1 class="player-time">{{ formattedTime }}</h1>
+    </div>
   </div>
 </template>
   
 <style scoped>
+.playertimer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.playertimer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 button {
   margin: 5px;
+  width: 100%; /* Ensure all buttons have the same width */
 }
+
+.player-name {
+  flex: 1;
+  text-align: center;
+}
+
+.player-time {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
 .timer {
   text-align: center;
 }
+
 .btn-primary {
   font-size: 3em;
-  margin: 20px 0;
+  margin: 10px 0;
   cursor: pointer;
   white-space: nowrap;
-  text-align: center;
+  text-align: left;
 }
+
 .active {
-  background-color: black; /* Change this color to whatever you prefer */
+  background-color: black;
   color: white;
-  border: 2px solid #0056b3; /* Darker border color */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Add shadow for more emphasis */
-  opacity: 1; /* Ensure the button is fully opaque */
+  border: 2px solid #0056b3;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  opacity: 1;
 }
 </style>
