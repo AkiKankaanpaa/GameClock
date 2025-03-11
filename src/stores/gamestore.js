@@ -19,21 +19,21 @@ export const useGameStore = defineStore('game', {
       }});
       this.initialTime = gameData.initialTime;
       this.increment = gameData.increment;
-      this.activePlayer = gameData.activePlayer || 0;
-      this.paused = gameData.paused || true;
+      this.activePlayer = 0;
+      this.paused = true;
     },
 
     updateGameData(updateData) {
       this.players = updateData.players;
-      this.activePlayer = updateData.activePlayer;
       this.paused = updateData.paused;
+      this.activePlayer = updateData.activePlayer;
     },
 
     returnUpdateData() {
       return {
         players: this.players,
-        activePlayer: this.activePlayer,
-        paused: this.paused,
+        initialTime: this.initialTime,
+        increment: this.increment,
       }
     }
   },

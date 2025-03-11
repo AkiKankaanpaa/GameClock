@@ -23,29 +23,33 @@ const goToGame = () => {
     time: clockBase.value * 60
   }))
 
-  console.log('Setting players: \n', playerData)
+  const setupData = {
+    players: playerData,
+    initialTime: Number(clockBase.value) * 60,
+    increment: Number(clockIncrement.value),
+  }
 
+  console.log('Setting players: \n', playerData)
   gameStore.setInitialGameData({
     players: playerData,
     initialTime: Number(clockBase.value) * 60,
     increment: Number(clockIncrement.value),
-    activePlayer: 0,
-    paused: true
   })
 
-  const data = gameStore.returnUpdateData()
+  console.log('Sending initial data: \n', setupData)
 
-  console.log('Sending initial data: \n', data)
   wss.sendMessage(JSON.stringify({
-    type: 'initialData',
-    data: data.players
+    type: 'setup',
+    players: playerData,
+    initialTime: Number(clockBase.value) * 60,
+    increment: Number(clockIncrement.value),
   }))
 
   router.push({ name: 'game' })
 }
 
 const updatePlayerNames = () => {
-  playerNames.value = Array.from({ length: playerCount.value }, (_, i) => playerNames.value[i] || '')
+  playerNames.value = Array.from({length: playerCount.value }, (_, i) => playerNames.value[i] || '')
 }
 
 watch(playerCount, updatePlayerNames)
@@ -53,22 +57,33 @@ watch(playerCount, updatePlayerNames)
 
 <template>
   <body>
-    <main>
+    <main class="home-view">
       <p class="h1">Home View</p>
         <div class="form-group">
           <InputElement :label="'Base Time (minutes)'" v-model="clockBase" />
           <InputElement :label="'Clock Increment (seconds)'" v-model="clockIncrement" />
           
           <label for="playercount">Player Count</label>
-          <input type="number" id="playercount" v-model.number="playerCount" class="form-control" min="1" max="6" />
+          <input type="number" id="playercount" 
+            v-model.number="playerCount" class="form-control" min="1" max="6" 
+          />
           <div id="playerNames">
             <InputElement v-for="(name, index) in playerCount" :key="index" 
               :label="'Player ' + (index + 1)" v-model="playerNames[index]" />
           </div>
         </div>
-
       <button type="button" class="btn btn-primary mt-2" @click="goToGame">Go to Game</button>
-
     </main>
   </body>
 </template>
+
+<style scoped>
+.home-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+}
+</style>

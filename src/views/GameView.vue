@@ -23,29 +23,28 @@
   };
 
   const togglePause = () => {
-    gameStore.paused = !gameStore.paused;
-    const gameData = gameStore.returnUpdateData()
+    console.log('Toggling pause\n', )
+    wss.sendMessage(JSON.stringify({ type: 'togglePause' }))
+  }
 
-    console.log('Sending pause data: \n', gameData.players)
-    wss.sendMessage(JSON.stringify({
-      type: 'updateData',
-      players: gameData.players,
-      activePlayer: gameData.activePlayer,
-      paused: gameData.paused
-    }))
+  const toggleNext = () => {
+    console.log('Toggling next player\n', )
+    wss.sendMessage(JSON.stringify({ type: 'toggleNext' }))
+  }
+
+  const reset = () => {
+    console.log('Resetting game\n', )
+    wss.sendMessage(JSON.stringify({ type: 'reset' }))
   }
 
   wss.connection.value.onmessage = (event) => {
     const data = JSON.parse(event.data);
     console.log('Received data:\n', data)
-    if (data.type === 'serverData') {
-      gameStore.updateGameData(data.data);
+    if (data.type === 'updateData') {
+      console.log("Updating data:\n", data)
+      gameStore.updateGameData(data);
     }
   };
-
-  setTimeout(() => {
-    wss.sendMessage(JSON.stringify({ type: 'requestData' }));
-  }, 1000);
 </script>
 
 <template>
@@ -55,12 +54,19 @@
       :key="index"
       :playerName="players[index].name"
       :initialTime="players[index].time" 
-      :timerId="index"
+      :timerId="String(index)"
       :isActive="index === gameStore.activePlayer"
       @timerPaused="handleTimerPaused(index)"/>
   </div>
-    <button type="button" class="btn btn-primary mt-2"
-      @click="togglePause">{{ pauseButtonText }}</button>
+    <button type="button" class="btn-primary mt-2"
+      @click="toggleNext">Next Player
+    </button>
+    <button type="button" class="btn-primary mt-2"
+      @click="togglePause">{{ pauseButtonText }}
+    </button>
+    <button type="button" class="btn-primary mt-2"
+      @click="reset">Reset
+    </button>
   </main>
 </template>
   

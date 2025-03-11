@@ -30,7 +30,7 @@
     timerInterval = setInterval(() => {
       gameStore.players[Number(props.timerId)]["time"]
         = gameStore.players[Number(props.timerId)]["time"] - 1;
-    }, 1000);
+    });
   };
 
   const stopTimer = () => {
