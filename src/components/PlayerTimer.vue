@@ -10,84 +10,31 @@
       required: true,
     },
     timerId: {
-      type: String,
+      type: Number,
       required: true,
     },
   })
 
-  const isRunning = ref(false);
-  let timerInterval = null;
-
   const formattedTime = computed(() => {
     const minutes = String(Math.floor(gameStore
-      .players[Number(props.timerId)]["time"] / 60)).padStart(2, '30');
+      .players[props.timerId]["time"] / 60)).padStart(2, '0');
     const seconds = String(gameStore
-      .players[Number(props.timerId)]["time"] % 60).padStart(2, '0');
+      .players[props.timerId]["time"] % 60).padStart(2, '0');
     return `${minutes}:${seconds}`;
   });
 
-  const startTimer = () => {
-    timerInterval = setInterval(() => {
-      gameStore.players[Number(props.timerId)]["time"]
-        = gameStore.players[Number(props.timerId)]["time"] - 1;
-    });
-  };
-
-  const stopTimer = () => {
-    clearInterval(timerInterval);
-  };
-
   const toggleNext = () => {
-    const playerCount = Object.keys(gameStore.players).length;
-    if (gameStore.activePlayer === playerCount - 1) {
-      gameStore.activePlayer = 0;
-    } else {
-      gameStore.activePlayer = gameStore.activePlayer + 1;
-    }
-    console.log("Currently active player: ", gameStore.activePlayer)
-
-    const gameData = gameStore.returnUpdateData()
-
-    console.log('Sending toggle data: \n', gameData)
-    wss.sendMessage(JSON.stringify({
-      type: 'updateData',
-      players: gameData.players,
-      activePlayer: gameData.activePlayer,
-      paused: gameData.paused
-    }))
-  };
-
-  watch(() => gameStore.activePlayer, (newVal) => {
-    console.log("Active player changed to: ",
-                "\nActive player - ", gameStore.activePlayer,
-                "\nTimerId - ", Number(props.timerId))
-    if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
-      startTimer();
-    } else {
-      stopTimer();
-    }
-  });
-
-  watch(() => gameStore.paused, () => {
-    console.log("Pause changed to: ", gameStore.paused,
-                "\nActive player - ", gameStore.activePlayer)
-    if (gameStore.activePlayer === Number(props.timerId) && !gameStore.paused) {
-      startTimer();
-    } else {
-      stopTimer();
-    }
-  });
-
-  onBeforeUnmount(() => {
-    clearInterval(timerInterval);
-  });
+    console.log('Toggling next player\n', )
+        console.log('Timer index:', props.timerId, '\nStore Index:', gameStore.activePlayer)
+    wss.sendMessage(JSON.stringify({ type: 'toggleNext' }))
+  }
 </script>
 
 <template>
   <div class="playertimer-container">
     <div class="playertimer">
       <button type="button" class="btn btn-primary"
-        :class="{ active: gameStore.activePlayer === Number(props.timerId) }"
+        :class="{ active: props.timerId === gameStore.activePlayer }"
         @click="toggleNext">
         <span class="player-name">{{ playerName }}</span>
       </button>

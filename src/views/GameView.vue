@@ -50,12 +50,11 @@
 <template>
   <main>
   <div class="playertimer-container">
-    <PlayerTimer v-for="(player, index) in gameStore.players"
+    <PlayerTimer v-for="(player, index) in players"
       :key="index"
       :playerName="players[index].name"
       :initialTime="players[index].time" 
-      :timerId="String(index)"
-      :isActive="index === gameStore.activePlayer"
+      :timerId=Number(index)
       @timerPaused="handleTimerPaused(index)"/>
   </div>
     <button type="button" class="btn-primary mt-2"

@@ -24,7 +24,11 @@ export const useGameStore = defineStore('game', {
     },
 
     updateGameData(updateData) {
-      this.players = updateData.players;
+      updateData.players.forEach((time, index) => {
+        if (this.players[index]) {
+          this.players[index].time = time;
+        }
+      });
       this.paused = updateData.paused;
       this.activePlayer = updateData.activePlayer;
     },

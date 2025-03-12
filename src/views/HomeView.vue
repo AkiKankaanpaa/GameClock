@@ -9,8 +9,8 @@ import wss from '../services/socketservice'
 const router = useRouter()
 const gameStore = useGameStore()
 
-const playerCount = ref(1)
-const playerNames = ref([])
+const playerCount = ref(2)
+const playerNames = ref(["a", "b"])
 
 const clockBase = ref("20")
 const clockIncrement = ref("60")
@@ -29,18 +29,18 @@ const goToGame = () => {
     increment: Number(clockIncrement.value),
   }
 
-  console.log('Setting players: \n', playerData)
+  console.log('Setting players to store: \n', playerData)
   gameStore.setInitialGameData({
     players: playerData,
     initialTime: Number(clockBase.value) * 60,
     increment: Number(clockIncrement.value),
   })
 
-  console.log('Sending initial data: \n', setupData)
+  console.log('Sending initial data to server: \n', setupData)
 
   wss.sendMessage(JSON.stringify({
     type: 'setup',
-    players: playerData,
+    playerCount: playerCount.value,
     initialTime: Number(clockBase.value) * 60,
     increment: Number(clockIncrement.value),
   }))
