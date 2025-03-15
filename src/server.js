@@ -3,9 +3,11 @@ import { WebSocketServer } from 'ws';
 const wss = new WebSocketServer({ port: 8080 });
 
 let sPlayers = [];
+let sPlayerNames = [];
 
 let sTime = 1200;
 let sIncrement = 60;
+
 let sActivePlayer = 0;
 let sPaused = true;
 
@@ -18,7 +20,7 @@ const startTimer = () => {
       sPlayers[sActivePlayer] -= 1;
       broadcastUpdate();
     }
-  }, 10);
+  }, 1000);
 };
 
 const stopTimer = () => {
@@ -44,15 +46,17 @@ wss.on('connection', (ws) => {
   console.log('Fetching current data');
 
   // Send data to new client
-  setTimeout(() => {
-    ws.send(JSON.stringify({ type: 'serverData', data: {
+    ws.send(JSON.stringify({
+      type: 'serverData',
       players: sPlayers,
+      playerNames: sPlayerNames,
       activePlayer: sActivePlayer,
       paused: sPaused,
-    }}));
-  }, 1000);
-  console.log('Starting data to new client, package:\nPlayers - ',
-              sPlayers, '\nActive player - ', sActivePlayer, '\nPaused - ', sPaused);
+    }));
+  console.log(
+    'Starting data to new client, package:\nPlayers - ',sPlayers,
+    '\nActive player - ', sActivePlayer,
+    '\nPaused - ', sPaused);
 
   ws.on('message', (message) => {
     console.log('Received message:', message);
@@ -62,18 +66,11 @@ wss.on('connection', (ws) => {
       if (data.type === 'setup') {
         sPlayers = new Array(data.playerCount).fill(data.initialTime);
         console.log(sPlayers)
+        sPlayerNames = data.playerNames;
         sTime = data.initialTime;
         sIncrement = data.increment;
 
         broadcastUpdate(); 
-
-      } else if (data.type === 'initialData') {
-        console.log('Sending game data to client');
-        ws.send(JSON.stringify({ type: 'initialData', data: {
-          players: sPlayers,
-          paused: sPaused,
-          activePlayer: sActivePlayer,
-        }}));
 
       } else if (data.type === 'togglePause') {
         sPaused = !sPaused;

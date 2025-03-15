@@ -23,24 +23,14 @@ const goToGame = () => {
     time: clockBase.value * 60
   }))
 
-  const setupData = {
-    players: playerData,
-    initialTime: Number(clockBase.value) * 60,
-    increment: Number(clockIncrement.value),
-  }
-
   console.log('Setting players to store: \n', playerData)
-  gameStore.setInitialGameData({
-    players: playerData,
-    initialTime: Number(clockBase.value) * 60,
-    increment: Number(clockIncrement.value),
-  })
+  gameStore.setInitialGameData(playerData)
 
-  console.log('Sending initial data to server: \n', setupData)
-
+  console.log('Sending initial data to server')
   wss.sendMessage(JSON.stringify({
     type: 'setup',
     playerCount: playerCount.value,
+    playerNames: playerNames.value,
     initialTime: Number(clockBase.value) * 60,
     increment: Number(clockIncrement.value),
   }))

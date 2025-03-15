@@ -16,9 +16,23 @@
 
   wss.connection.value.onmessage = (event) => {
     const data = JSON.parse(event.data);
+    if (data.type === 'updateData') {
+      console.log("Updating data:\n", data)
+      gameStore.updateGameData(data);
+    } else if (data.type === 'serverData') {
+      console.log("Initializing data:\n", data)
+      const playerData = Array.from({ length: data.players.length }, (_, i) => ({
+        name: data.playerNames[i],
+        time: data.players[i]
+      }))
 
-    if (data.type === 'serverData') {
-      gameStore.setGameData(data.data);
+      console.log(playerData)
+      gameStore.setInitialGameData(playerData);
+      gameStore.updateGameData({
+        players: data.players,
+        paused: data.paused,
+        activePlayer: data.activePlayer,
+      })
     }
   };
 
@@ -36,15 +50,6 @@
     console.log('Resetting game\n', )
     wss.sendMessage(JSON.stringify({ type: 'reset' }))
   }
-
-  wss.connection.value.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('Received data:\n', data)
-    if (data.type === 'updateData') {
-      console.log("Updating data:\n", data)
-      gameStore.updateGameData(data);
-    }
-  };
 </script>
 
 <template>

@@ -25,7 +25,8 @@
   wss.connection.value.onmessage = (event) => {
     const data = JSON.parse(event.data);
     if (data.type === 'updateData') {
-      paused.value = sPaused;
+      paused.value = data.paused;
+      console.log("bong")
     }
   };
 </script>
